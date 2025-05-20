@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Rater</title>
+    <script>
+        async function addMovie() {
+            const title = document.getElementById("title").value;
+            const genre = document.getElementById("genre").value;
+            const rating = document.getElementById("rating").value;
+            await fetch(`/add?title=${title}&genre=${genre}&rating=${rating}`, { method: "POST" });
+            location.reload();
+        }
+
+        async function deleteMovie(id) {
+            await fetch(`/delete/${id}`, { method: "DELETE" });
+            location.reload();
+        }
+    </script>
+</head>
+<body>
+    <h1>Movie Rater 🎬</h1>
+    <input type="text" id="title" placeholder="Naslov">
+    <input type="text" id="genre" placeholder="Žanr">
+    <input type="number" id="rating" placeholder="Ocena (1-10)">
+    <button onclick="addMovie()">Dodaj film</button>
+
+    <ul>
+        {% for movie in movies %}
+            <li>{{ movie.title }} ({{ movie.genre }}) - {{ movie.rating }}/10
+                <button onclick="deleteMovie('{{ movie.id }}')">Izbriši</button>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
