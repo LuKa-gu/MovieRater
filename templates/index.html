@@ -2,34 +2,73 @@
 <html>
 <head>
     <title>Movie Rater</title>
-    <script>
-        async function addMovie() {
-            const title = document.getElementById("title").value;
-            const genre = document.getElementById("genre").value;
-            const rating = document.getElementById("rating").value;
-            await fetch(`/add?title=${title}&genre=${genre}&rating=${rating}`, { method: "POST" });
-            location.reload();
-        }
-
-        async function deleteMovie(id) {
-            await fetch(`/delete/${id}`, { method: "DELETE" });
-            location.reload();
-        }
-    </script>
+    <style>
+        label { display: block; margin-top: 10px; }
+        input, button { margin-bottom: 10px; }
+    </style>
 </head>
 <body>
     <h1>Movie Rater 🎬</h1>
-    <input type="text" id="title" placeholder="Naslov">
-    <input type="text" id="genre" placeholder="Žanr">
-    <input type="number" id="rating" placeholder="Ocena (1-10)">
-    <button onclick="addMovie()">Dodaj film</button>
 
+    <!-- Obrazec za dodajanje novega filma -->
+    <form action="/movies" method="post">
+        <label for="title">Naslov:</label>
+        <input type="text" id="title" name="title" required>
+
+        <label for="genre">Žanr:</label>
+        <input type="text" id="genre" name="genre" required>
+
+        <label for="rating">Ocena (1-10):</label>
+        <input type="number" id="rating" name="rating" min="1" max="10" step="0.1" required>
+
+        <label for="date">Datum:</label>
+        <input type="date" id="date" name="date" required>
+
+        <button type="submit" style="display:block; margin-top:10px;">Dodaj film</button>
+    </form>
+
+    <hr>
+
+    <!-- Seznam obstoječih filmov -->
+    <h2>Seznam filmov</h2>
     <ul>
         {% for movie in movies %}
-            <li>{{ movie.title }} ({{ movie.genre }}) - {{ movie.rating }}/10
-                <button onclick="deleteMovie('{{ movie.id }}')">Izbriši</button>
+            <li>
+                <strong>{{ movie.title }}</strong> | {{ movie.genre }} | Ocena: {{ movie.rating }}/10 | Datum: {{ movie.date_display }} 
+
+                <!-- Gumb za izbris -->
+                <form action="/movies/{{ movie.id }}/delete" method="post" style="display:inline;">
+                    <button type="submit">Izbriši</button>
+                </form>
+
+                <!-- Gumb za urejanje (pokaže skriti obrazec) -->
+                <button onclick="toggleEditForm('{{ movie.id }}')">Uredi</button>
+
+                <!-- Skriti obrazec za urejanje -->
+                <form action="/movies/{{ movie.id }}/update" method="post" id="edit-form-{{ movie.id }}" style="display:none; margin-top:10px;">
+                    <label>Naslov:</label>
+                    <input type="text" name="title" value="{{ movie.title }}" required>
+
+                    <label>Žanr:</label>
+                    <input type="text" name="genre" value="{{ movie.genre }}" required>
+
+                    <label>Ocena (1-10):</label>
+                    <input type="number" name="rating" min="1" max="10" step="0.1" value="{{ movie.rating }}" required>
+
+                    <label>Datum:</label>
+                    <input type="date" name="date" value="{{ movie.date }}" required>
+
+                    <button type="submit">Shrani</button>
+                </form>
             </li>
         {% endfor %}
     </ul>
+
+    <script>
+        function toggleEditForm(id) {
+            const form = document.getElementById(`edit-form-${id}`);
+            form.style.display = (form.style.display === "none") ? "block" : "none";
+        }
+    </script>
 </body>
 </html>
